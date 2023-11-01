@@ -26,3 +26,11 @@ function typeText(element, text, delay) {
 }
 
 const typingElement = document.getElementById('typing-animation');
+
+// Initialize the typing animation
+
+document.addEventListener('DOMContentLoaded', () => {
+  const textToType = "This is a typing animation.";
+  const typingDelay = 100; // Delay in milliseconds between each character.
+  typeText(typingElement, textToType, typingDelay);
+});
