@@ -7,30 +7,3 @@ window.addEventListener('scroll', () => {
   document.querySelector('#mainCloud').style.marginTop = `-${window.scrollY}px`;
   document.querySelector('#rightCloud').style.marginRight = `-${window.scrollY}px`;
 });
-
-// Add the typing animation code below
-
-function typeText(element, text, delay) {
-  let index = 0;
-  element.innerHTML = '';
-
-  function type() {
-    if (index < text.length) {
-      element.innerHTML += text.charAt(index);
-      index++;
-      setTimeout(type, delay);
-    }
-  }
-
-  type();
-}
-
-const typingElement = document.getElementById('typing-animation');
-
-// Initialize the typing animation
-
-document.addEventListener('DOMContentLoaded', () => {
-  const textToType = "This is a typing animation.";
-  const typingDelay = 100; // Delay in milliseconds between each character.
-  typeText(typingElement, textToType, typingDelay);
-});
