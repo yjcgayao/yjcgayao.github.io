@@ -652,7 +652,7 @@ section {
 }
 
 .about .image {
-    background: url("../img/me.gif") center center no-repeat;
+    background: url("../img/me1.gif") center center no-repeat;
     background-size: contain; /* Change this line to use contain */
     min-height: 600px;
     height: 100%;
