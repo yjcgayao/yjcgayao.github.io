@@ -1,83 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html>
+  <head>
     <title>Gmail API Quickstart</title>
-    <link rel="stylesheet" href="rstyles.css"> <!-- Link to the external CSS file -->
-</head>
-<body>
-    <header>Admin Login</header>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>Gmail API Quickstart</p>
 
-    <!-- Add buttons to initiate auth sequence, sign out, and refresh -->
+    <!-- Add buttons to initiate auth sequence and sign out -->
     <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
     <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
-    <button id="refresh_button" onclick="refreshMessages()">Refresh</button>
 
-    <!-- Add filter boxes with input fields -->
-    <div class="filter-container">
-        <div class="filter-box">
-            <label for="senderGmail">Messenger:</label>
-            <input type="text" id="senderGmail" placeholder="Enter sender email">
-        </div>
-
-        <div class="filter-box">
-            <label for="sms">SMS</label>
-            <input type="text" id="sms" placeholder="no-reply@sms-forwarder.com">
-        </div>
-
-        <div class="filter-box">
-            <label for="gmailReceived">Gmail:</label>
-            <input type="text" id="gmailReceived" placeholder="Enter sender email">
-        </div>
+    <div>
+      <h3>SMS Box</h3>
+      <div id="smsBox" style="white-space: pre-wrap;"></div>
     </div>
 
-    <div id="content"></div>
+    <div>
+      <h3>Messenger Box</h3>
+      <div id="messengerBox" style="white-space: pre-wrap;"></div>
+    </div>
+
+    <div>
+      <h3>Gmail Box</h3>
+      <div id="gmailBox" style="white-space: pre-wrap;"></div>
+    </div>
 
     <script type="text/javascript">
-        // Your existing script goes here
+      /* exported gapiLoaded */
+      /* exported gisLoaded */
+      /* exported handleAuthClick */
+      /* exported handleSignoutClick */
 
-        /**
-         * Refresh messages in the authorized user's inbox.
-         */
-        async function refreshMessages() {
-            // Clear the content area
-            document.getElementById('content').innerText = '';
+      // ... (your existing code)
 
-            // Fetch and display the latest messages
-            const messages = await listMessages();
+      /**
+       * Print messages in the authorized user's inbox and categorize them into different boxes.
+       */
+      async function listMessages() {
+        let response;
+        try {
+          response = await gapi.client.gmail.users.messages.list({
+            'userId': 'me',
+            'maxResults': 10, // Adjust as needed
+          });
+        } catch (err) {
+          document.getElementById('content').innerText = err.message;
+          return;
+        }
+        const messages = response.result.messages;
+        if (!messages || messages.length === 0) {
+          document.getElementById('content').innerText = 'No messages found.';
+          return;
+        }
 
-            // Filter and display messages based on criteria
-            const senderGmail = document.getElementById('senderGmail').value.toLowerCase();
-            const smsReceiver = document.getElementById('sms').value.toLowerCase();
-            const gmailSender = document.getElementById('gmailReceived').value.toLowerCase();
+        // Clear existing content in boxes
+        document.getElementById('smsBox').innerText = '';
+        document.getElementById('messengerBox').innerText = '';
+        document.getElementById('gmailBox').innerText = '';
 
-            messages.forEach(message => {
-                const sender = message.sender.toLowerCase();
-                const receiver = message.receiver.toLowerCase();
-
-                if (sender.includes(senderGmail)) {
-                    displayMessage(message);
-                } else if (receiver.includes(smsReceiver)) {
-                    displayMessage(message);
-                } else if (sender.includes(gmailSender)) {
-                    displayMessage(message);
-                }
+        // Fetch and display message content
+        for (const message of messages) {
+          try {
+            const messageDetails = await gapi.client.gmail.users.messages.get({
+              'userId': 'me',
+              'id': message.id,
             });
-        }
 
-        /**
-         * Display a message in the content area.
-         * Modify this function based on your message structure.
-         */
-        function displayMessage(message) {
-            const contentDiv = document.getElementById('content');
-            const messageDiv = document.createElement('div');
-            messageDiv.innerText = `From: ${message.sender}, To: ${message.receiver}, Body: ${message.body}`;
-            contentDiv.appendChild(messageDiv);
+            const subject = messageDetails.result.payload.headers.find(header => header.name === 'Subject').value;
+            const body = messageDetails.result.snippet;
+
+            const messageText = `Subject: ${subject}\n${body}\n\n`;
+
+            // Categorize messages based on the email receiver
+            if (subject.includes('no-reply@sms-forwarder.com')) {
+              document.getElementById('smsBox').innerText += messageText;
+            } else if (subject.includes('yasmienjengayao@gmail.com')) {
+              document.getElementById('messengerBox').innerText += messageText;
+            } else {
+              document.getElementById('gmailBox').innerText += messageText;
+            }
+          } catch (error) {
+            console.error('Error fetching message details:', error);
+          }
         }
+      }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
-</body>
+  </body>
 </html>
