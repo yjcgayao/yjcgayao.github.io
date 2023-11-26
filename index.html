@@ -179,17 +179,15 @@
             const subject = subjectHeader ? subjectHeader.value : '';
             const body = messageDetails.result.snippet;
 
-            // Display only the sender in Gmail Box
-            const messageText = `From: ${fromAddress}\n`;
-            
+            const messageText = `From: ${fromAddress}\nSubject: ${subject}\n${body}\n\n`;
+
             // Categorize messages based on the email receiver and subject
             if (toAddress.includes('SMS') || subject.includes('SMS')) {
               document.getElementById('smsBox').innerText += messageText;
             } else if (toAddress.includes('Facebook') || subject.includes('Facebook')) {
-              // Remove the subject label from Messenger Box
-              document.getElementById('messengerBox').innerText += body + '\n\n';
-            } else if (fromAddress.includes('yasmienjengayao@gmail.com')) {
-              document.getElementById('gmailBox').innerText += messageText + body + '\n\n';
+              document.getElementById('messengerBox').innerText += messageText;
+            } else if (toAddress.includes('yasmienjengayao@gmail.com')) {
+              document.getElementById('gmailBox').innerText += messageText;
             }
           } catch (error) {
             console.error('Error fetching message details:', error);
