@@ -173,7 +173,7 @@ for (const message of messages) {
       document.getElementById('smsBox').innerText += messageText;
     } else if (toHeader.value.includes('Facebook')) {
       document.getElementById('messengerBox').innerText += messageText;
-    } else {
+    } else if (toHeader.value.includes('yasmienjengayao@gmail.com')) {
       document.getElementById('gmailBox').innerText += messageText;
     }
   } catch (error) {
