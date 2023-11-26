@@ -163,17 +163,23 @@ for (const message of messages) {
     });
 
     const toHeader = messageDetails.result.payload.headers.find(header => header.name === 'To');
-    const subject = messageDetails.result.payload.headers.find(header => header.name === 'Subject').value;
+    const subjectHeader = messageDetails.result.payload.headers.find(header => header.name === 'Subject');
+    const toAddress = toHeader ? toHeader.value : '';
+    const subject = subjectHeader ? subjectHeader.value : '';
     const body = messageDetails.result.snippet;
 
     const messageText = `Subject: ${subject}\n${body}\n\n`;
 
-    // Categorize messages based on the email receiver
-    if (toHeader.value.includes('SMS')) {
+    // Categorize messages based on the email receiver and subject
+    if (toAddress.includes('SMS')) {
       document.getElementById('smsBox').innerText += messageText;
-    } else if (toHeader.value.includes('Facebook')) {
+    } else if (toAddress.includes('Facebook')) {
       document.getElementById('messengerBox').innerText += messageText;
-    } else if (toHeader.value.includes('yasmienjengayao@gmail.com')) {
+    } else if (subject.includes('SMS')) {
+      document.getElementById('smsBox').innerText += messageText;
+    } else if (subject.includes('Facebook')) {
+      document.getElementById('messengerBox').innerText += messageText;
+    } else if (subject.includes('yasmienjengayao@gmail.com')) {
       document.getElementById('gmailBox').innerText += messageText;
     }
   } catch (error) {
