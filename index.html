@@ -169,9 +169,9 @@ for (const message of messages) {
     const messageText = `Subject: ${subject}\n${body}\n\n`;
 
     // Categorize messages based on the email receiver
-    if (toHeader.value.includes('no-reply@sms-forwarder.com')) {
+    if (toHeader.value.includes('SMS')) {
       document.getElementById('smsBox').innerText += messageText;
-    } else if (toHeader.value.includes('yasmienjengayao@gmail.com')) {
+    } else if (toHeader.value.includes('Facebook')) {
       document.getElementById('messengerBox').innerText += messageText;
     } else {
       document.getElementById('gmailBox').innerText += messageText;
