@@ -377,24 +377,28 @@
       /**
        *  Sign out the user upon button click.
        */
-  function handleSignoutClick() {
-  const token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
+ function handleSignoutClick() {
+  const auth2 = gapi.auth2.getAuthInstance();
+  
+  auth2.signOut().then(() => {
+    const token = auth2.currentUser.get().getAuthResponse().id_token;
 
-  if (token !== null) {
-    fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
-      .then(() => {
-        gapi.auth2.getAuthInstance().signOut().then(() => {
-          document.getElementById('authorize_button').innerText = 'Authorize';
-          document.getElementById('signout_button').style.visibility = 'hidden';
-          document.getElementById('smsBox').innerText = '';
-          document.getElementById('messengerBox').innerText = '';
-          document.getElementById('gmailBox').innerText = '';
-        });
-      })
-      .catch((error) => {
-        console.error('Error revoking token:', error);
-      });
-  }
+    if (token) {
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', `https://accounts.google.com/o/oauth2/revoke?token=${token}`);
+      xhr.onload = () => {
+        auth2.disconnect();
+        document.getElementById('authorize_button').innerText = 'Authorize';
+        document.getElementById('signout_button').style.visibility = 'hidden';
+        document.getElementById('smsBox').innerText = '';
+        document.getElementById('messengerBox').innerText = '';
+        document.getElementById('gmailBox').innerText = '';
+      };
+      xhr.send();
+    } else {
+      console.error('Failed to retrieve token for revocation.');
+    }
+  });
 }
      
       /* exported gapiLoaded */
