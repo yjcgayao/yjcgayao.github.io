@@ -268,8 +268,6 @@
                 <p>Admin Login</p>
     <!-- Add buttons to initiate auth sequence and sign out -->
     <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
-    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
-
     <div>
       <h3>SMS Box</h3>
       <div id="smsBox" style="white-space: pre-wrap;"></div>
@@ -373,40 +371,10 @@
           tokenClient.requestAccessToken({ prompt: '' });
         }
       }
-
-      /**
-       *  Sign out the user upon button click.
-       */
- function handleSignoutClick() {
-  const auth2 = gapi.auth2.getAuthInstance();
-  
-  auth2.signOut().then(() => {
-    const token = auth2.currentUser.get().getAuthResponse().id_token;
-
-    if (token) {
-      const xhr = new XMLHttpRequest();
-      xhr.open('GET', `https://accounts.google.com/o/oauth2/revoke?token=${token}`);
-      xhr.onload = () => {
-        auth2.disconnect();
-        document.getElementById('authorize_button').innerText = 'Authorize';
-        document.getElementById('signout_button').style.visibility = 'hidden';
-        document.getElementById('smsBox').innerText = '';
-        document.getElementById('messengerBox').innerText = '';
-        document.getElementById('gmailBox').innerText = '';
-      };
-      xhr.send();
-    } else {
-      console.error('Failed to retrieve token for revocation.');
-    }
-  });
-}
      
       /* exported gapiLoaded */
       /* exported gisLoaded */
       /* exported handleAuthClick */
-      /* exported handleSignoutClick */
-
-      // ... (unchanged code)
 
       /**
        * Print messages in the authorized user's inbox and categorize them into different boxes.
