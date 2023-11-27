@@ -934,6 +934,7 @@ section {
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  color: #000000; /* Set text color to black */
 }
 
 #contact .info-box h3 {
@@ -949,6 +950,7 @@ section {
   padding: 15px;
   border-radius: 8px;
   margin-top: 10px;
+  color: #000000; /* Set text color to black */
 }
 
 #smsBox h3,
