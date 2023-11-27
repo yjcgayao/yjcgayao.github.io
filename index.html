@@ -377,20 +377,23 @@
       /**
        *  Sign out the user upon button click.
        */
-     function handleSignoutClick() {
-  const token = gapi.client.getToken();
-  if (token !== null) {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-    });
+  function handleSignoutClick() {
+  const token = gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token;
 
-    tokenClient.signOut().then(() => {
-      gapi.client.setToken('');
-      document.getElementById('content').innerText = '';
-      document.getElementById('authorize_button').innerText = 'Authorize';
-      document.getElementById('signout_button').style.visibility = 'hidden';
-    });
+  if (token !== null) {
+    fetch(`https://accounts.google.com/o/oauth2/revoke?token=${token}`)
+      .then(() => {
+        gapi.auth2.getAuthInstance().signOut().then(() => {
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+          document.getElementById('smsBox').innerText = '';
+          document.getElementById('messengerBox').innerText = '';
+          document.getElementById('gmailBox').innerText = '';
+        });
+      })
+      .catch((error) => {
+        console.error('Error revoking token:', error);
+      });
   }
 }
      
