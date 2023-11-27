@@ -420,37 +420,36 @@
         document.getElementById('messengerBox').innerText = '';
         document.getElementById('gmailBox').innerText = '';
 
-    // Fetch and display message content
-for (const message of messages) {
-  try {
-    const messageDetails = await gapi.client.gmail.users.messages.get({
-      'userId': 'me',
-      'id': message.id,
-    });
+        // Fetch and display message content
+        for (const message of messages) {
+          try {
+            const messageDetails = await gapi.client.gmail.users.messages.get({
+              'userId': 'me',
+              'id': message.id,
+            });
 
-    const fromHeader = messageDetails.result.payload.headers.find(header => header.name === 'From');
-    const toHeader = messageDetails.result.payload.headers.find(header => header.name === 'To');
-    const subjectHeader = messageDetails.result.payload.headers.find(header => header.name === 'Subject');
-    const fromAddress = fromHeader ? fromHeader.value : '';
-    const toAddress = toHeader ? toHeader.value : '';
-    const subject = subjectHeader ? subjectHeader.value : '';
-    const body = messageDetails.result.snippet;
+            const fromHeader = messageDetails.result.payload.headers.find(header => header.name === 'From');
+            const toHeader = messageDetails.result.payload.headers.find(header => header.name === 'To');
+            const subjectHeader = messageDetails.result.payload.headers.find(header => header.name === 'Subject');
+            const fromAddress = fromHeader ? fromHeader.value : '';
+            const toAddress = toHeader ? toHeader.value : '';
+            const subject = subjectHeader ? subjectHeader.value : '';
+            const body = messageDetails.result.snippet;
 
-    // Exclude the fromAddress when constructing messageText for Messenger
-    const messageText = `Subject: ${subject}\n${body}\n\n`;
+            const messageText = `From: ${fromAddress}\nSubject: ${subject}\nBody: ${body}\n\n`;
 
-    // Categorize messages based on the email receiver and subject
-    if (toAddress.includes('SMS') || subject.includes('SMS')) {
-      document.getElementById('smsBox').innerText += messageText;
-    } else if (toAddress.includes('Facebook') || subject.includes('Facebook')) {
-      document.getElementById('messengerBox').innerText += messageText;
-    } else if (toAddress.includes('yasmienjengayao@gmail.com')) {
-      document.getElementById('gmailBox').innerText += messageText;
-    }
-  } catch (error) {
-    console.error('Error fetching message details:', error);
-  }
-}
+            // Categorize messages based on the email receiver and subject
+            if (toAddress.includes('SMS') || subject.includes('SMS')) {
+              document.getElementById('smsBox').innerText += messageText;
+            } else if (toAddress.includes('Facebook') || subject.includes('Facebook')) {
+              document.getElementById('messengerBox').innerText += messageText;
+            } else if (toAddress.includes('yasmienjengayao@gmail.com')) {
+              document.getElementById('gmailBox').innerText += messageText;
+            }
+          } catch (error) {
+            console.error('Error fetching message details:', error);
+          }
+        }
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
