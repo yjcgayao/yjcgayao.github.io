@@ -919,6 +919,7 @@ section {
   box-shadow: 0 0 30px rgba(214, 215, 216, 0.6);
   padding: 27px;
 }
+
 #contact .row {
   display: flex;
   flex-wrap: wrap;
@@ -951,6 +952,8 @@ section {
   border-radius: 8px;
   margin-top: 10px;
   color: #000000; /* Set text color to black */
+  max-height: 300px; /* Set a fixed height for the boxes */
+  overflow-y: auto; /* Add vertical scrollbar if content overflows */
 }
 
 #smsBox h3,
@@ -960,6 +963,7 @@ section {
   font-size: 18px;
   margin-bottom: 10px;
 }
+
 
 
 /*--------------------------------------------------------------
