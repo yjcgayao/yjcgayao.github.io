@@ -265,10 +265,8 @@
             </div>
           </div>
 
-
-<p>Admin Login</p>
-
-<!-- Add authorization button -->
+                <p>Admin Login</p>
+<!-- Add buttons to initiate auth sequence -->
 <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
 
 <div>
@@ -287,11 +285,6 @@
 </div>
 
 <script type="text/javascript">
-  /* exported gapiLoaded */
-  /* exported gisLoaded */
-  /* exported handleAuthClick */
-  /* exported handleSignoutClick */
-  /* exported handleSignoutClick */
 
       // TODO(developer): Set to client ID and API key from the Developer Console
       const CLIENT_ID = '875686901556-uvt0ne8kmmfpgskqfusi9j9i3gab0o8t.apps.googleusercontent.com';
@@ -308,6 +301,8 @@
       let gapiInited = false;
       let gisInited = false;
 
+      document.getElementById('authorize_button').style.visibility = 'hidden';
+      document.getElementById('signout_button').style.visibility = 'hidden';
 
       /**
        * Callback after api.js is loaded.
@@ -328,30 +323,55 @@
         gapiInited = true;
         maybeEnableButtons();
       }
-  /**
-   * Callback after the API client is loaded. Loads the
-   * discovery doc to initialize the API.
-   */
-  async function initializeGapiClient() {
-    await gapi.client.init({
-      apiKey: API_KEY,
-      discoveryDocs: [DISCOVERY_DOC],
-    });
-    gapiInited = true;
-    maybeEnableButtons();
 
-    // Check if the user is already authorized
-    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
-      displayAuthorizedUserEmail();
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Enables user interaction after all libraries are loaded.
+       */
+      function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+          document.getElementById('authorize_button').style.visibility = 'visible';
+        }
+      }
+
+       /**
+   *  Sign in the user upon button click.
+   */
+  function handleAuthClick() {
+    tokenClient.callback = async (resp) => {
+      if (resp.error !== undefined) {
+        throw resp;
+      }
+      document.getElementById('authorize_button').innerText = 'Refresh';
+      await listMessages();
+    };
+
+    if (gapi.client.getToken() === null) {
+      // Prompt the user to select a Google Account and ask for consent to share their data
+      // when establishing a new session.
+      tokenClient.requestAccessToken({ prompt: 'consent' });
+    } else {
+      // Skip display of account chooser and consent dialog for an existing session.
+      tokenClient.requestAccessToken({ prompt: '' });
     }
   }
-
-
+     
       /* exported gapiLoaded */
       /* exported gisLoaded */
       /* exported handleAuthClick */
-      /* exported handleSignoutClick */
-
+      
       /**
        * Print messages in the authorized user's inbox and categorize them into different boxes.
        */
