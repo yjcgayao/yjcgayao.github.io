@@ -281,8 +281,18 @@
                   <h3>Gmail Box</h3>
                   <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQINNFfNOYu_dCB6YtwdGoTsm3ESqk6QKViYtB8u2T-CBxwisXuaMFovZ-gbXA2zqkFyd_KodZAF53l/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false"style="width:100%; height:500px;"></iframe>
                 </div>
+ <button onclick="refreshAllIframes()">Refresh All</button>
 
-  </main><!-- End #main -->
+</main><!-- End #main -->
+
+<script>
+  function refreshAllIframes() {
+    var iframes = document.querySelectorAll('iframe');
+    iframes.forEach(function (iframe) {
+      iframe.src = iframe.src;
+    });
+  }
+</script>
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
