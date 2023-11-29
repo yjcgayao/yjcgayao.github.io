@@ -266,8 +266,6 @@
           </div>
 
                 <p>Admin Login</p>
-<!-- Add buttons to initiate auth sequence -->
-<button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
 
 <div>
   <h3>SMS Box</h3>
@@ -301,9 +299,10 @@
       let gapiInited = false;
       let gisInited = false;
 
-      document.getElementById('authorize_button').style.visibility = 'hidden';
-      document.getElementById('signout_button').style.visibility = 'hidden';
-
+     document.addEventListener('DOMContentLoaded', function() {
+    // Automatically authorize the admin user when the page is loaded
+    handleAuthClick();
+  });
       /**
        * Callback after api.js is loaded.
        */
@@ -371,7 +370,7 @@
       /* exported gapiLoaded */
       /* exported gisLoaded */
       /* exported handleAuthClick */
-      
+
       /**
        * Print messages in the authorized user's inbox and categorize them into different boxes.
        */
