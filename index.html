@@ -265,7 +265,11 @@
             </div>
           </div>
 
+
 <p>Admin Login</p>
+
+<!-- Add authorization button -->
+<button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
 
 <div>
   <h3>SMS Box</h3>
@@ -303,12 +307,6 @@
       let gapiInited = false;
       let gisInited = false;
 
-     // Update the "Authorize" button to act as a refresh button
-  document.getElementById('authorize_button').innerText = 'Refresh';
-  document.getElementById('authorize_button').addEventListener('click', handleAuthClick);
-
-  // Hide the unnecessary buttons
-  document.getElementById('signout_button').style.display = 'none';
 
       /**
        * Callback after api.js is loaded.
@@ -342,49 +340,20 @@
     maybeEnableButtons();
   }
 
-      /**
-       *  Sign in the user upon button click.
-       */
-      function handleAuthClick() {
-        tokenClient.callback = async (resp) => {
-          if (resp.error !== undefined) {
-            throw resp;
-          }
-          document.getElementById('signout_button').style.visibility = 'visible';
-          document.getElementById('authorize_button').innerText = 'Refresh';
-          await listMessages();
-        };
+      // Update the "Authorize" button to act as a refresh button
+  function updateAuthorizeButton() {
+    const authorizeButton = document.getElementById('authorize_button');
+    if (gapi.client.getToken() === null) {
+      authorizeButton.innerText = 'Authorize';
+    } else {
+      authorizeButton.innerText = 'Refresh';
+    }
+  }
 
-        if (gapi.client.getToken() === null) {
-          // Prompt the user to select a Google Account and ask for consent to share their data
-          // when establishing a new session.
-          tokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-          // Skip display of account chooser and consent dialog for an existing session.
-          tokenClient.requestAccessToken({ prompt: '' });
-        }
-      }
-
-      /**
-       *  Sign out the user upon button click.
-       */
-      function handleSignoutClick() {
-        const token = gapi.client.getToken();
-        if (token !== null) {
-          google.accounts.oauth2.revoke(token.access_token);
-          gapi.client.setToken('');
-          document.getElementById('content').innerText = '';
-          document.getElementById('authorize_button').innerText = 'Authorize';
-          document.getElementById('signout_button').style.visibility = 'hidden';
-        }
-      }
-     
       /* exported gapiLoaded */
       /* exported gisLoaded */
       /* exported handleAuthClick */
       /* exported handleSignoutClick */
-
-      // ... (unchanged code)
 
       /**
        * Print messages in the authorized user's inbox and categorize them into different boxes.
