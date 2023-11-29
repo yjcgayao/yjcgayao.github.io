@@ -299,10 +299,12 @@
       let gapiInited = false;
       let gisInited = false;
 
-     document.addEventListener('DOMContentLoaded', function() {
-    // Automatically authorize the admin user when the page is loaded
+ document.addEventListener('DOMContentLoaded', function () {
+  // Delay the authentication process by 1 second after the page is loaded
+  setTimeout(() => {
     handleAuthClick();
-  });
+  }, 1000);
+});
       /**
        * Callback after api.js is loaded.
        */
