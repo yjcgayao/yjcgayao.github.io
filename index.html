@@ -350,12 +350,11 @@
        /**
    *  Sign in the user upon button click.
    */
-  function handleAuthClick() {
+   function handleAuthClick() {
     tokenClient.callback = async (resp) => {
       if (resp.error !== undefined) {
         throw resp;
       }
-      document.getElementById('authorize_button').innerText = 'Refresh';
       await listMessages();
     };
 
