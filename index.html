@@ -291,6 +291,7 @@
   /* exported gisLoaded */
   /* exported handleAuthClick */
   /* exported handleSignoutClick */
+  /* exported handleSignoutClick */
 
       // TODO(developer): Set to client ID and API key from the Developer Console
       const CLIENT_ID = '875686901556-uvt0ne8kmmfpgskqfusi9j9i3gab0o8t.apps.googleusercontent.com';
@@ -328,27 +329,23 @@
         maybeEnableButtons();
       }
   /**
-   * Callback after Google Identity Services are loaded.
+   * Callback after the API client is loaded. Loads the
+   * discovery doc to initialize the API.
    */
-  function gisLoaded() {
-    tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id: CLIENT_ID,
-      scope: SCOPES,
-      callback: '', // defined later
+  async function initializeGapiClient() {
+    await gapi.client.init({
+      apiKey: API_KEY,
+      discoveryDocs: [DISCOVERY_DOC],
     });
-    gisInited = true;
+    gapiInited = true;
     maybeEnableButtons();
-  }
 
-      // Update the "Authorize" button to act as a refresh button
-  function updateAuthorizeButton() {
-    const authorizeButton = document.getElementById('authorize_button');
-    if (gapi.client.getToken() === null) {
-      authorizeButton.innerText = 'Authorize';
-    } else {
-      authorizeButton.innerText = 'Refresh';
+    // Check if the user is already authorized
+    if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+      displayAuthorizedUserEmail();
     }
   }
+
 
       /* exported gapiLoaded */
       /* exported gisLoaded */
