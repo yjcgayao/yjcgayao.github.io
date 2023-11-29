@@ -265,31 +265,28 @@
             </div>
           </div>
 
-                <p>Admin Login</p>
-    <!-- Add buttons to initiate auth sequence and sign out -->
-    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
-    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+<p>Admin Login</p>
 
-    <div>
-      <h3>SMS Box</h3>
-      <div id="smsBox" style="white-space: pre-wrap;"></div>
-    </div>
+<div>
+  <h3>SMS Box</h3>
+  <div id="smsBox" style="white-space: pre-wrap;"></div>
+</div>
 
-    <div>
-      <h3>Messenger Box</h3>
-      <div id="messengerBox" style="white-space: pre-wrap;"></div>
-    </div>
+<div>
+  <h3>Messenger Box</h3>
+  <div id="messengerBox" style="white-space: pre-wrap;"></div>
+</div>
 
-    <div>
-      <h3>Gmail Box</h3>
-      <div id="gmailBox" style="white-space: pre-wrap;"></div>
-    </div>
+<div>
+  <h3>Gmail Box</h3>
+  <div id="gmailBox" style="white-space: pre-wrap;"></div>
+</div>
 
-    <script type="text/javascript">
-      /* exported gapiLoaded */
-      /* exported gisLoaded */
-      /* exported handleAuthClick */
-      /* exported handleSignoutClick */
+<script type="text/javascript">
+  /* exported gapiLoaded */
+  /* exported gisLoaded */
+  /* exported handleAuthClick */
+  /* exported handleSignoutClick */
 
       // TODO(developer): Set to client ID and API key from the Developer Console
       const CLIENT_ID = '875686901556-uvt0ne8kmmfpgskqfusi9j9i3gab0o8t.apps.googleusercontent.com';
@@ -306,8 +303,12 @@
       let gapiInited = false;
       let gisInited = false;
 
-      document.getElementById('authorize_button').style.visibility = 'hidden';
-      document.getElementById('signout_button').style.visibility = 'hidden';
+     // Update the "Authorize" button to act as a refresh button
+  document.getElementById('authorize_button').innerText = 'Refresh';
+  document.getElementById('authorize_button').addEventListener('click', handleAuthClick);
+
+  // Hide the unnecessary buttons
+  document.getElementById('signout_button').style.display = 'none';
 
       /**
        * Callback after api.js is loaded.
@@ -328,28 +329,18 @@
         gapiInited = true;
         maybeEnableButtons();
       }
-
-      /**
-       * Callback after Google Identity Services are loaded.
-       */
-      function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: '', // defined later
-        });
-        gisInited = true;
-        maybeEnableButtons();
-      }
-
-      /**
-       * Enables user interaction after all libraries are loaded.
-       */
-      function maybeEnableButtons() {
-        if (gapiInited && gisInited) {
-          document.getElementById('authorize_button').style.visibility = 'visible';
-        }
-      }
+  /**
+   * Callback after Google Identity Services are loaded.
+   */
+  function gisLoaded() {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: '', // defined later
+    });
+    gisInited = true;
+    maybeEnableButtons();
+  }
 
       /**
        *  Sign in the user upon button click.
