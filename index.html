@@ -265,40 +265,203 @@
             </div>
           </div>
 
-                <p>Admin Messages</p>
+                <p>Admin Login</p>
+    <!-- Add buttons to initiate auth sequence and sign out -->
+    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
 
-                <div>
-                  <h3>SMS Box</h3>
-                  <iframe src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQINNFfNOYu_dCB6YtwdGoTsm3ESqk6QKViYtB8u2T-CBxwisXuaMFovZ-gbXA2zqkFyd_KodZAF53l/pubhtml?gid=1830556587&amp;single=true&amp;widget=true&amp;headers=false" style="width:100%; height:500px;"></iframe>
-                </div>
-                
-                <div>
-                  <h3>Messenger Box</h3>
-                  <iframe src= "https://docs.google.com/spreadsheets/d/e/2PACX-1vQINNFfNOYu_dCB6YtwdGoTsm3ESqk6QKViYtB8u2T-CBxwisXuaMFovZ-gbXA2zqkFyd_KodZAF53l/pubhtml?gid=349314395&amp;single=true&amp;widget=true&amp;headers=false" style="width:100%; height:500px;"></iframe>
-                </div>
-                
-                <div>
-                  <h3>Gmail Box</h3>
-                  <iframe src= "https://docs.google.com/spreadsheets/d/e/2PACX-1vQINNFfNOYu_dCB6YtwdGoTsm3ESqk6QKViYtB8u2T-CBxwisXuaMFovZ-gbXA2zqkFyd_KodZAF53l/pubhtml?gid=0&amp;single=true&amp;widget=true&amp;headers=false" style="width:100%; height:500px;"></iframe>
-                </div>
- <button onclick="refreshAllIframes()">Refresh All</button>
+    <div>
+      <h3>SMS Box</h3>
+      <div id="smsBox" style="white-space: pre-wrap;"></div>
+    </div>
 
-</main><!-- End #main -->
+    <div>
+      <h3>Messenger Box</h3>
+      <div id="messengerBox" style="white-space: pre-wrap;"></div>
+    </div>
 
-<script>
-  function refreshAllIframes() {
-    var iframes = document.querySelectorAll('iframe');
-    iframes.forEach(function (iframe) {
-      iframe.src = iframe.src;
-    });
-  }
-</script>
+    <div>
+      <h3>Gmail Box</h3>
+      <div id="gmailBox" style="white-space: pre-wrap;"></div>
+    </div>
+
+    <script type="text/javascript">
+      /* exported gapiLoaded */
+      /* exported gisLoaded */
+      /* exported handleAuthClick */
+      /* exported handleSignoutClick */
+
+      // TODO(developer): Set to client ID and API key from the Developer Console
+      const CLIENT_ID = '875686901556-uvt0ne8kmmfpgskqfusi9j9i3gab0o8t.apps.googleusercontent.com';
+      const API_KEY = 'AIzaSyDuQWe1C0K42LhKUhpJFuixlLYFak4mq-k';
+
+      // Discovery doc URL for APIs used by the quickstart
+      const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest';
+
+      // Authorization scopes required by the API; multiple scopes can be
+      // included, separated by spaces.
+      const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly';
+
+      let tokenClient;
+      let gapiInited = false;
+      let gisInited = false;
+
+      document.getElementById('authorize_button').style.visibility = 'hidden';
+      document.getElementById('signout_button').style.visibility = 'hidden';
+
+      /**
+       * Callback after api.js is loaded.
+       */
+      function gapiLoaded() {
+        gapi.load('client', initializeGapiClient);
+      }
+
+      /**
+       * Callback after the API client is loaded. Loads the
+       * discovery doc to initialize the API.
+       */
+      async function initializeGapiClient() {
+        await gapi.client.init({
+          apiKey: API_KEY,
+          discoveryDocs: [DISCOVERY_DOC],
+        });
+        gapiInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Callback after Google Identity Services are loaded.
+       */
+      function gisLoaded() {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CLIENT_ID,
+          scope: SCOPES,
+          callback: '', // defined later
+        });
+        gisInited = true;
+        maybeEnableButtons();
+      }
+
+      /**
+       * Enables user interaction after all libraries are loaded.
+       */
+      function maybeEnableButtons() {
+        if (gapiInited && gisInited) {
+          document.getElementById('authorize_button').style.visibility = 'visible';
+        }
+      }
+
+      /**
+       *  Sign in the user upon button click.
+       */
+      function handleAuthClick() {
+        tokenClient.callback = async (resp) => {
+          if (resp.error !== undefined) {
+            throw resp;
+          }
+          document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('authorize_button').innerText = 'Refresh';
+          await listMessages();
+        };
+
+        if (gapi.client.getToken() === null) {
+          // Prompt the user to select a Google Account and ask for consent to share their data
+          // when establishing a new session.
+          tokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+          // Skip display of account chooser and consent dialog for an existing session.
+          tokenClient.requestAccessToken({ prompt: '' });
+        }
+      }
+
+      /**
+       *  Sign out the user upon button click.
+       */
+      function handleSignoutClick() {
+        const token = gapi.client.getToken();
+        if (token !== null) {
+          google.accounts.oauth2.revoke(token.access_token);
+          gapi.client.setToken('');
+          document.getElementById('content').innerText = '';
+          document.getElementById('authorize_button').innerText = 'Authorize';
+          document.getElementById('signout_button').style.visibility = 'hidden';
+        }
+      }
+     
+      /* exported gapiLoaded */
+      /* exported gisLoaded */
+      /* exported handleAuthClick */
+      /* exported handleSignoutClick */
+
+      // ... (unchanged code)
+
+      /**
+       * Print messages in the authorized user's inbox and categorize them into different boxes.
+       */
+      async function listMessages() {
+        let response;
+        try {
+          response = await gapi.client.gmail.users.messages.list({
+            'userId': 'me',
+            'maxResults': 10, // Adjust as needed
+          });
+        } catch (err) {
+          document.getElementById('content').innerText = err.message;
+          return;
+        }
+        const messages = response.result.messages;
+        if (!messages || messages.length === 0) {
+          document.getElementById('content').innerText = 'No messages found.';
+          return;
+        }
+
+        // Clear existing content in boxes
+        document.getElementById('smsBox').innerText = '';
+        document.getElementById('messengerBox').innerText = '';
+        document.getElementById('gmailBox').innerText = '';
+
+        // Fetch and display message content
+        for (const message of messages) {
+          try {
+            const messageDetails = await gapi.client.gmail.users.messages.get({
+              'userId': 'me',
+              'id': message.id,
+            });
+
+            const fromHeader = messageDetails.result.payload.headers.find(header => header.name === 'From');
+            const toHeader = messageDetails.result.payload.headers.find(header => header.name === 'To');
+            const subjectHeader = messageDetails.result.payload.headers.find(header => header.name === 'Subject');
+            const fromAddress = fromHeader ? fromHeader.value : '';
+            const toAddress = toHeader ? toHeader.value : '';
+            const subject = subjectHeader ? subjectHeader.value : '';
+            const body = messageDetails.result.snippet;
+
+            const messageText = `From: ${fromAddress}\nSubject: ${subject}\nBody: ${body}\n\n`;
+
+            // Categorize messages based on the email receiver and subject
+            if (toAddress.includes('SMS') || subject.includes('SMS')) {
+              document.getElementById('smsBox').innerText += messageText;
+            } else if (toAddress.includes('Facebook') || subject.includes('Facebook')) {
+              document.getElementById('messengerBox').innerText += messageText;
+            } else if (toAddress.includes('yasmienjengayao@gmail.com')) {
+              document.getElementById('gmailBox').innerText += messageText;
+            }
+          } catch (error) {
+            console.error('Error fetching message details:', error);
+          }
+        }
+      }
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+  </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
   <footer id="footer">
     <div class="container">
       <h3>Yasmien Jen C. Gayao</h3>
-      <p>Nothing is impossible! You can do it self, you too reader :)</p>
+      <p>Nothing is impossible! You can do it self, you to reader :)</p>
       <div class="social-links">
         <a href="https://www.facebook.com/yasmienjengayao/" class="facebook"><i class="bx bxl-facebook"></i></a>
       </div>
